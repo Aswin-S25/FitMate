@@ -12,6 +12,7 @@ import 'package:fitmate/services/shared_Preference.dart';
 import 'package:fitmate/widgets/text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class PersonalDetails extends StatefulWidget {
   // final String? name;
@@ -105,8 +106,15 @@ class _PersonalDetailsState extends State<PersonalDetails> {
     final String height = _heightController.text;
     final String weight = _weightController.text;
     final String age = _ageController.text;
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    int id = prefs.getInt('id')!;
 
-    bool response = await APIServices().AddPersonalData(height, weight, age);
+    bool response = await APIServices().AddPersonalData(
+      height,
+      weight,
+      age,
+      id
+    );
 
     if (response) {
       ScaffoldMessenger.of(context).showSnackBar(

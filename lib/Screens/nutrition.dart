@@ -9,6 +9,7 @@ import 'package:fitmate/widgets/Table.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MyNutrition extends StatefulWidget {
   const MyNutrition({super.key});
@@ -68,18 +69,17 @@ class _MyNutritionState extends State<MyNutrition> {
     log("$foodItems  ${foodItems.length}food item in MyTable");
     // log("foodItems.foodName.toString() ${foodItems[0]} food item in MyTable");
     return Scaffold(
-        appBar:  AppBar(
-        backgroundColor: const Color.fromARGB(255, 21, 21, 21),
+        appBar: AppBar(
+            backgroundColor: const Color.fromARGB(255, 21, 21, 21),
             elevation: 2,
             leadingWidth: 50,
             actions: [
               Image.asset(
-              'assets/images/logo1.png',
-              width: 50,
-              height: 50,
-            ),
-            ]
-      ),
+                'assets/images/logo1.png',
+                width: 50,
+                height: 50,
+              ),
+            ]),
         body: FutureBuilder(
             future: Future.delayed(
                 const Duration(seconds: 3)), // Delay of 5 seconds
@@ -498,14 +498,16 @@ class _MyNutritionState extends State<MyNutrition> {
 
   void addData(
       String name, String type, double quantity, double calories) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    int id = prefs.getInt('id')!;
     FoodCaloriesRequestModel foodCaloriesRequestModel =
         FoodCaloriesRequestModel(
             foodName: name,
             foodType: type,
             quantity: quantity,
             calories: calories);
-    log("$name $type $quantity $calories");
-    bool response = await APIServices().addFood(foodCaloriesRequestModel);
+    log("$name $type $quantity $calories $id");
+    bool response = await APIServices().addFood(foodCaloriesRequestModel, id);
     if (response) {
       log("data added");
       // ignore: use_build_context_synchronously
@@ -536,7 +538,10 @@ class _MyNutritionState extends State<MyNutrition> {
     final today = formatter.format(now);
 
     try {
-      FoodResponseModel res = await APIServices().fetchFoodData();
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      int id = prefs.getInt('id')!;
+
+      FoodResponseModel res = await APIServices().fetchFoodData(id);
       setState(() {
         foodItems = res.data
             .where((item) => formatter.format(item.foodTime) == today)

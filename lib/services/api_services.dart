@@ -6,6 +6,7 @@ import 'package:fitmate/Models/food_response.dart';
 import 'package:fitmate/Models/user_response.dart';
 import 'package:http/http.dart' as http;
 import 'package:jwt_decoder/jwt_decoder.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class APIServices {
   static var client = http.Client();
@@ -43,13 +44,13 @@ class APIServices {
   }
 
   //Food ADDING API REQUEST
-  Future<bool> addFood(FoodCaloriesRequestModel model) async {
+  Future<bool> addFood(FoodCaloriesRequestModel model, int? userId) async {
     log(model.toJson().toString());
     Map<String, String> headers = {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
     };
-    int userId = 1;
+  
     final url = Uri.parse(
         "https://fitmate-api-r2ic.onrender.com/user/data/food/details/add/$userId");
     final body = jsonEncode(model.toJson());
@@ -73,8 +74,9 @@ class APIServices {
 
   //get added food from user
 
-Future<FoodResponseModel> fetchFoodData() async {
-  final url = Uri.parse('https://fitmate-api-r2ic.onrender.com/user/data/food/details/read/1');
+  Future<FoodResponseModel> fetchFoodData(int? id) async {
+    final url = Uri.parse(
+        'https://fitmate-api-r2ic.onrender.com/user/data/food/details/read/$id');
 
     final response = await http.post(url);
     if (response.statusCode == 200) {
@@ -91,7 +93,7 @@ Future<FoodResponseModel> fetchFoodData() async {
   Future<bool> RegisterUser(String name, String email, String password) async {
     log(url.toString() + 'user/auth/signup');
 
-   Map<String, String> header = {
+    Map<String, String> header = {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
     };
@@ -102,8 +104,10 @@ Future<FoodResponseModel> fetchFoodData() async {
       "password": password,
     });
     log(body.toString());
-    final response =
-        await http.post(Uri.parse('https://fitmate-api-r2ic.onrender.com/user/auth/signup'), body: body, headers: header);
+    final response = await http.post(
+        Uri.parse('https://fitmate-api-r2ic.onrender.com/user/auth/signup'),
+        body: body,
+        headers: header);
 
     log(response.body);
     log(response.statusCode.toString());
@@ -117,10 +121,10 @@ Future<FoodResponseModel> fetchFoodData() async {
   }
 
   //add personal data
-  Future<bool> AddPersonalData(String age, String height, String weight ) async {
-    log(url.toString() + 'user/auth/signup');
+  Future<bool> AddPersonalData(String age, String height, String weight, int? id) async {
+    log('${url}user/auth/signup');
 
-   Map<String, String> header = {
+    Map<String, String> header = {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
     };
@@ -131,8 +135,11 @@ Future<FoodResponseModel> fetchFoodData() async {
       "weight": weight,
     });
     log(body.toString());
-    final response =
-        await http.post(Uri.parse('https://fitmate-api-r2ic.onrender.com/user/data/biometrix/add/${1}'), body: body, headers: header);
+    final response = await http.post(
+        Uri.parse(
+            'https://fitmate-api-r2ic.onrender.com/user/data/biometrix/add/${id}'),
+        body: body,
+        headers: header);
 
     log(response.body);
     log(response.statusCode.toString());
@@ -156,8 +163,10 @@ Future<FoodResponseModel> fetchFoodData() async {
       "password": password,
     });
     log(body.toString());
-    final response =
-        await http.post(Uri.parse('https://fitmate-api-r2ic.onrender.com/user/auth/signin'), body: body, headers: header);
+    final response = await http.post(
+        Uri.parse('https://fitmate-api-r2ic.onrender.com/user/auth/signin'),
+        body: body,
+        headers: header);
 
     log(response.body);
     log(response.statusCode.toString());
@@ -168,8 +177,6 @@ Future<FoodResponseModel> fetchFoodData() async {
     final decodedToken = JwtDecoder.decode(jwtToken);
     LoginResponse loginResponse = LoginResponse.fromJson(decodedToken);
 
-    
-
     if (response.statusCode == 200) {
       log(response.body);
       return loginResponse;
@@ -177,6 +184,10 @@ Future<FoodResponseModel> fetchFoodData() async {
       return null;
     }
   }
+}
 
-
+Future<int> fetch() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  int? id = int.parse(prefs.getString('id')!);
+  return id;
 }

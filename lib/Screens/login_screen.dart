@@ -6,11 +6,13 @@ import 'package:fitmate/Models/user_response.dart';
 import 'package:fitmate/Screens/dashboard.dart';
 import 'package:fitmate/Screens/home_screen.dart';
 import 'package:fitmate/Screens/person_detail.dart';
+import 'package:fitmate/Screens/root.dart';
 import 'package:fitmate/services/api_services.dart';
 import 'package:fitmate/widgets/text_field.dart';
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sign_button/sign_button.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -129,6 +131,9 @@ class _LoginScreenState extends State<LoginScreen> {
         LoginResponse? response = await APIServices().login(emailController.text, passwordController.text);
         if(response != null) {
           // ignore: use_build_context_synchronously
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          prefs.setString('name', response.name);
+          prefs.setInt('id', response.id);
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Login Successful'),
@@ -140,7 +145,7 @@ class _LoginScreenState extends State<LoginScreen> {
           // ignore: use_build_context_synchronously
           Navigator.pushAndRemoveUntil(
             context,
-            MaterialPageRoute(builder: (context) => Dashboard()),
+            MaterialPageRoute(builder: (context) => const RootPage()),
                 (Route<dynamic> route) => false,
           );
         }

@@ -11,7 +11,6 @@ class MyTable extends StatelessWidget {
   Widget build(BuildContext context) {
     log("$foodItems  ${foodItems.length}food item in MyTable");
     // log(foodItems.foodName.toString());
-      log(foodItems.last.foodName.toString() + "last food item in MyTable");
 
     return Container(
       decoration: BoxDecoration(
